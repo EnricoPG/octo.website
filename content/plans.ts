@@ -1,0 +1,32 @@
+export const plans = [
+  {
+    name: "ESENCIAL",
+    description: "Para empezar tu presencia digital.",
+    items: ["Landing page profesional", "WhatsApp integrado", "Formulario de contacto", "Analítica básica"],
+    price: "$X",
+    note: "Pago único",
+    cta: "COTIZAR",
+    recommended: false,
+    plus: false,
+  },
+  {
+    name: "CRECIMIENTO",
+    description: "Para empresas que quieren generar más clientes.",
+    items: ["Sitio web completo", "WhatsApp integrado", "SEO inicial", "Analítica avanzada", "Integraciones básicas", "Soporte por 60 días"],
+    price: "$X",
+    note: "Pago único",
+    cta: "COTIZAR",
+    recommended: true,
+    plus: false,
+  },
+  {
+    name: "OCTO",
+    description: "Para empresas que quieren evolucionar continuamente.",
+    items: ["Sitio web completo", "Automatizaciones", "Integraciones avanzadas", "Soporte continuo", "Mejoras continuas", "Reportes y optimización"],
+    price: "$X / mes",
+    note: "Suscripción mensual",
+    cta: "CONOCER OCTO+",
+    recommended: false,
+    plus: true,
+  },
+] as const;
