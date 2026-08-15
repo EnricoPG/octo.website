@@ -44,3 +44,6 @@ Mobile motion refinement: restores adapted scroll reveals, subtle ecosystem move
 
 ## v1.4.3
 Corrección de estructura de planes y mensajes personalizados de WhatsApp por paquete.
+
+## v1.4.4
+Corrección de reproducción del video/animación cinematográfica en mobile: HLS nativo prioritario en Safari/iOS, autoplay reforzado y reanudación de playback.

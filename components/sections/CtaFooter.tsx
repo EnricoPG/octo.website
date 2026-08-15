@@ -23,15 +23,33 @@ export default function CtaFooter() {
   useEffect(() => {
     const section = sectionRef.current;
     const video = videoRef.current;
-
     if (!section || !video) return;
 
-    const startVideo = () => {
-      if (startedRef.current) return;
-      startedRef.current = true;
+    const playVideo = () => {
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.play().catch(() => {});
+    };
 
+    const startVideo = () => {
+      if (startedRef.current) {
+        playVideo();
+        return;
+      }
+
+      startedRef.current = true;
       const src = cinematicCta.videoUrl;
 
+      // iPhone/iPad/Safari: use native HLS first.
+      // This is more reliable than forcing hls.js on mobile Safari.
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = src;
+        video.load();
+        return;
+      }
+
+      // Chrome/Android and browsers without native HLS.
       if (Hls.isSupported()) {
         const hls = new Hls({
           startLevel: 0,
@@ -45,19 +63,13 @@ export default function CtaFooter() {
         hls.loadSource(src);
         hls.attachMedia(video);
 
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch(() => {});
-        });
+        hls.on(Hls.Events.MANIFEST_PARSED, playVideo);
 
         hls.on(Hls.Events.ERROR, (_event, data) => {
           if (data.fatal) {
             console.error("OCTO HLS fatal error:", data.type, data.details);
           }
         });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = src;
-        video.load();
-        video.play().catch(() => {});
       }
     };
 
@@ -76,8 +88,26 @@ export default function CtaFooter() {
 
     observer.observe(section);
 
+    // Mobile Safari can occasionally suspend autoplay while the page is
+    // backgrounded or while scrolling. Retry playback when the tab becomes
+    // active and on the user's first interaction.
+    const resumePlayback = () => {
+      if (startedRef.current) playVideo();
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") resumePlayback();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("touchstart", resumePlayback, { passive: true, once: true });
+    window.addEventListener("pointerdown", resumePlayback, { passive: true, once: true });
+
     return () => {
       observer.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("touchstart", resumePlayback);
+      window.removeEventListener("pointerdown", resumePlayback);
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
@@ -87,11 +117,16 @@ export default function CtaFooter() {
     <section ref={sectionRef} id="contacto" className="cinematic-cta section-line">
       <video
         ref={videoRef}
+        autoPlay
         muted
         loop
         playsInline
         preload="metadata"
-        onCanPlay={() => setReady(true)}
+        onLoadedMetadata={() => videoRef.current?.play().catch(() => {})}
+        onCanPlay={() => {
+          setReady(true);
+          videoRef.current?.play().catch(() => {});
+        }}
         className={`cinematic-video ${ready ? "is-ready" : ""}`}
         aria-hidden="true"
       />

@@ -45,7 +45,6 @@ export default function Orbit() {
         <path d="M380 545 L380 612" />
       </svg>
 
-      {orbitPillars.map((item) => <div key={item.key} className={`map-node node-${item.key}`} />)}
     </div>
   );
 }
